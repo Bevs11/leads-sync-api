@@ -18,6 +18,12 @@ A FastAPI application for syncing lead data with HubSpot CRM. Supports batch and
 - [Starlette](https://www.starlette.io/)
 - [SQLite](https://www.sqlite.org/index.html)
 
+Create Virtual Environment:
+
+```sh
+python -m venv .venv
+```
+
 Install dependencies:
 
 ```sh
