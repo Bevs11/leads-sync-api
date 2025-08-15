@@ -39,9 +39,7 @@ class HubspotAPI:
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json"
         }
-        print("payload", payload)
-        print("url", url)
-        print("headers", headers)
+
         try:
             response = requests.post(url, json=payload, headers=headers)
             return response.json()
@@ -85,10 +83,6 @@ class HubspotAPI:
             "Content-Type": "application/json"
         }
 
-        print("contacts", contacts)
-        print("url", url)
-        print("headers", headers)
-
         response_json = []
         created_contacts = 0
         updated_contacts = 0
@@ -110,11 +104,9 @@ class HubspotAPI:
                     for contact in chunked_data
                 ]
             }
-            print("payload", json.dumps(payload, indent=2))
+
 
             response = requests.post(url, data=json.dumps(payload), headers=headers, timeout=600)
-            print("Status code:", response.status_code)
-            print("Response text:", response.text)
 
             try:
                 response_json.extend(response.json()['results'])
