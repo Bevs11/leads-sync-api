@@ -14,11 +14,13 @@ A FastAPI application for syncing lead data with HubSpot CRM. Supports batch and
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [Requests](https://docs.python-requests.org/)
 - [Pydantic](https://docs.pydantic.dev/)
+- [Uvicorn](https://www.uvicorn.org/)
+- [Starlette](https://www.starlette.io/)
 
 Install dependencies:
 
 ```sh
-pip install fastapi requests pydantic uvicorn
+pip install -r requirements.txt
 ```
 
 ## Configuration
