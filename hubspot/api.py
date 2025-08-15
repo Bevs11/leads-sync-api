@@ -91,19 +91,19 @@ class HubspotAPI:
         error_count = 0
         errors = {}
         
-        valid_list, empty_fields = check_for_empty_fields(contacts)
+        valid_list, empty_email = check_for_empty_fields(contacts)
         valid_list, invalid_email = check_for_email_validity(valid_list)
         valid_list, duplicates = check_for_duplicates(valid_list)
 
-        if duplicates:
-            error_count += len(duplicates)
-            errors['duplicates'] = [dup.model_dump() for dup in duplicates]
-        if empty_fields:
-            error_count += len(empty_fields)
-            errors['empty_email'] = [empty.model_dump() for empty in empty_fields]
-        if invalid_email:
-            error_count += len(invalid_email)
-            errors['invalid_email'] = [invalid.model_dump() for invalid in invalid_email]
+        def add_errors(key, items):
+            nonlocal error_count
+            if items:
+                error_count += len(items)
+                errors[key] = [item.model_dump() for item in items]
+
+        add_errors('duplicates', duplicates)
+        add_errors('empty_email', empty_email)
+        add_errors('invalid_email', invalid_email)
             
 
         for chunked_data in self.chunk_data(valid_list, batch_size):
