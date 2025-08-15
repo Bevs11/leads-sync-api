@@ -16,6 +16,7 @@ A FastAPI application for syncing lead data with HubSpot CRM. Supports batch and
 - [Pydantic](https://docs.pydantic.dev/)
 - [Uvicorn](https://www.uvicorn.org/)
 - [Starlette](https://www.starlette.io/)
+- [SQLite](https://www.sqlite.org/index.html)
 
 Install dependencies:
 
@@ -32,12 +33,22 @@ HUBSPOT_ACCESS_TOKEN=your-access-token
 HUBSPOT_BASE_URL=https://api.hubapi.com
 ```
 
+## Database Setup
+
+The app uses SQLite for storing logs and lead data.
+
+Initialize the database:
+
+```sh
+python app/db_init.py
+```
+
 ## Usage
 
 Start the API server:
 
 ```sh
-uvicorn main:app --reload --env-file .env
+uvicorn app.main:app --reload --env-file .env
 ```
 
 ### Endpoints
