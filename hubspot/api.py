@@ -128,7 +128,7 @@ class HubspotAPI:
             response = requests.post(url, data=json.dumps(payload), headers=headers, timeout=600)
 
             data = response.json()
-            print(f"HubSpot response: {data}")
+
             if data.get("results"):
                 response_json.extend(data["results"])
             else:
