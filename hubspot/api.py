@@ -3,7 +3,7 @@ import os
 import json
 from fastapi import HTTPException
 from typing import List
-from app.crud import check_for_duplicates
+from app.crud import check_for_duplicates, check_for_empty_fields, check_for_email_validity
 
 
 HUBSPOT_ACCESS_TOKEN = os.getenv("HUBSPOT_ACCESS_TOKEN", "")
@@ -91,10 +91,19 @@ class HubspotAPI:
         error_count = 0
         errors = {}
         
-        valid_list, duplicates = check_for_duplicates(contacts)
+        valid_list, empty_fields = check_for_empty_fields(contacts)
+        valid_list, invalid_email = check_for_email_validity(valid_list)
+        valid_list, duplicates = check_for_duplicates(valid_list)
+
         if duplicates:
             error_count += len(duplicates)
             errors['duplicates'] = [dup.model_dump() for dup in duplicates]
+        if empty_fields:
+            error_count += len(empty_fields)
+            errors['empty_email'] = [empty.model_dump() for empty in empty_fields]
+        if invalid_email:
+            error_count += len(invalid_email)
+            errors['invalid_email'] = [invalid.model_dump() for invalid in invalid_email]
             
 
         for chunked_data in self.chunk_data(valid_list, batch_size):

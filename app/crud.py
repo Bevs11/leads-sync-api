@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models import ImportLog
 from typing import List, Optional, Any
+import re
 
 def log_import(
     db: Session,
@@ -49,3 +50,37 @@ def check_for_duplicates(leads:List):
 
     
     return valid_leads, duplicate_leads
+
+def check_for_empty_fields(leads: List):
+    """
+    Check for empty fields in leads.
+    Returns a list of leads with empty fields.
+    """
+    empty_email = []
+    valid_leads = []
+    
+    for lead in leads:
+        if not lead.email:
+            empty_email.append(lead)
+        else:
+            valid_leads.append(lead)
+    
+    return valid_leads, empty_email
+def check_for_email_validity(leads: List):
+    """
+    Check for valid email format in leads.
+    Returns a list of leads with invalid emails.
+    """
+
+    invalid_email = []
+    valid_leads = []
+    
+    email_regex = r"[^@]+@[^@]+\.[^@]+"
+    
+    for lead in leads:
+        if not re.match(email_regex, lead.email):
+            invalid_email.append(lead)
+        else:
+            valid_leads.append(lead)
+    
+    return valid_leads, invalid_email
