@@ -26,6 +26,18 @@ class HubspotAPI:
         return response.json()
 
     def create_contact(self, contact_data):
+        """
+        Creates a new contact in HubSpot CRM using the provided contact data.
+
+        Args:
+            contact_data: An object containing contact details (firstname, lastname, email, phone, company).
+
+        Returns:
+            dict: The JSON response from the HubSpot API.
+
+        Raises:
+            HTTPException: If the HubSpot API returns an HTTP error.
+        """
         url = f"{self.base_url}/crm/v3/objects/contacts"
         payload = {
             "properties": {
@@ -54,30 +66,20 @@ class HubspotAPI:
             yield lst[i:i + n]
     def batch_sync_contacts(self, contacts:List, batch_size:int=100):
         """
-        response sample:
-        {
-            "data": [    {
-                "id": "208130974412",
-                "properties": {
-                    "createdate": "2025-08-15T00:09:31.209Z",
-                    "email": "four@mail.com",
-                    "hs_is_unworked": "true",
-                    "hs_object_id": "208130974412",
-                    "hs_object_source": "INTEGRATION",
-                    "hs_object_source_id": "17895116",
-                    "hs_object_source_label": "INTEGRATION",
-                    "hs_pipeline": "contacts-lifecycle-pipeline",
-                    "lastmodifieddate": "2025-08-15T00:09:48.897Z",
-                    "lifecyclestage": "lead"
-                },
-                "createdAt": "2025-08-15T00:09:31.209Z",
-                "updatedAt": "2025-08-15T00:09:48.897Z",
-                "archived": false,
-                "new": false
-            }],
-            "created_contacts": 0,
-            "updated_contacts": 1
-        }
+        Batch syncs a list of contacts with HubSpot using the batch upsert endpoint.
+
+        - Validates contacts for empty fields, invalid emails, and duplicates.
+        - Splits contacts into batches of size `batch_size`.
+        - Sends each batch to HubSpot for upsert (create or update).
+        - Tracks and returns counts of created, updated, and errored contacts.
+        - Collects details of errors and responses for reporting.
+
+        Args:
+            contacts (List): List of contact objects to sync.
+            batch_size (int, optional): Number of contacts per batch. Defaults to 100.
+
+        Returns:
+            dict: Summary of sync results including counts, details, and errors.
         """
         url = f"{self.base_url}/crm/v3/objects/contacts/batch/upsert"
         headers = {
@@ -144,7 +146,6 @@ class HubspotAPI:
                 updated_count += 1
 
         return {
-            "data": response_json,
             "created_count": created_count,
             "updated_count": updated_count,
             "error_count": error_count, 
