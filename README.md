@@ -40,7 +40,7 @@ The app uses SQLite for storing logs and lead data.
 Initialize the database:
 
 ```sh
-python app/db_init.py
+python init_db.py
 ```
 
 ## Usage
