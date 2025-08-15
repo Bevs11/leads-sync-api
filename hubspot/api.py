@@ -3,6 +3,8 @@ import os
 import json
 from fastapi import HTTPException
 from typing import List
+from app.crud import check_for_duplicates
+
 
 HUBSPOT_ACCESS_TOKEN = os.getenv("HUBSPOT_ACCESS_TOKEN", "")
 HUBSPOT_BASE_URL = os.getenv("HUBSPOT_BASE_URL", "https://api.hubapi.com")
@@ -84,10 +86,18 @@ class HubspotAPI:
         }
 
         response_json = []
-        created_contacts = 0
-        updated_contacts = 0
+        created_count = 0
+        updated_count = 0
+        error_count = 0
+        errors = {}
+        
+        valid_list, duplicates = check_for_duplicates(contacts)
+        if duplicates:
+            error_count += len(duplicates)
+            errors['duplicates'] = [dup.model_dump() for dup in duplicates]
+            
 
-        for chunked_data in self.chunk_data(contacts, batch_size):
+        for chunked_data in self.chunk_data(valid_list, batch_size):
             payload = {
                 "inputs": [
                     {
@@ -108,19 +118,27 @@ class HubspotAPI:
 
             response = requests.post(url, data=json.dumps(payload), headers=headers, timeout=600)
 
-            try:
-                response_json.extend(response.json()['results'])
-            except ValueError:
-                raise HTTPException(status_code=400, detail="HubSpot returned non-JSON response")
+            data = response.json()
+            print(f"HubSpot response: {data}")
+            if data.get("results"):
+                response_json.extend(data["results"])
+            else:
+                error_count += len(chunked_data)
+                errors['error_message'] = [{"error": data.get("data"), "data": chunked_data}]
+                continue
+    
         
         for result in response_json:
             if result.get('new') == True:
-                created_contacts += 1
+                created_count += 1
             elif result.get('new') == False:
-                updated_contacts += 1
+                updated_count += 1
 
         return {
             "data": response_json,
-            "created_contacts": created_contacts,
-            "updated_contacts": updated_contacts
+            "created_count": created_count,
+            "updated_count": updated_count,
+            "error_count": error_count, 
+            "details": {"response": response_json,},
+            "errors": errors
         }
